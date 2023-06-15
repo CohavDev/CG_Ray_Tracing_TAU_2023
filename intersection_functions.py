@@ -95,7 +95,7 @@ def cube_intersection(ray, cube):
 
 
 def find_intersections(ray, objects):
-    min_t = -1
+    # min_t = -1
     surfaces_list = []
     EPSILON = 10**-8  # TODO:what the right value?
     for surface in objects:
@@ -109,7 +109,7 @@ def find_intersections(ray, objects):
 
         if t > EPSILON:
             surfaces_list.append((surface, t))
-            if t < min_t or min_t == -1:
-                min_t = t
+            # if t < min_t or min_t == -1:
+            #     min_t = t
 
     return surfaces_list.sort(key=lambda tup: tup[1])  # sort by t

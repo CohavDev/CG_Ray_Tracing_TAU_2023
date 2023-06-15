@@ -2,17 +2,18 @@ import numpy as np
 
 
 class Unit_Vector:
-    # __slots__ = ('dir')
 
     def __init__(self, direction):
         self.direction = direction / np.linalg.norm(direction)  # normalized vector
 
-    # def perpendicular_vector(self):
-    #     vector = np.cross(self.direction, np.array([1, 0, 0]))
-    #     if (vector == 0).all():
-    #         vector = np.cross(self.direction, np.array([0, 1, 0]))
-    #     vector /= np.linalg.norm(vector)
-    #     return vector
+    def perpendicular_vector(self):
+        # Find a perpendicular vector to self, with respect to x-axis or y-axis
+        x_unit_vector = np.array([1, 0, 0])
+        vector = np.cross(self.direction, x_unit_vector)
+        if np.all((vector == 0)):
+            y_unit_vector = np.array([0, 1, 0])
+            vector = Unit_Vector(np.cross(self.direction, np.array(y_unit_vector)))
+        return vector.direction
 
 
 class Screen:
