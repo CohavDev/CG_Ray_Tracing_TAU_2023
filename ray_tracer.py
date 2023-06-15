@@ -2,7 +2,9 @@ import argparse
 from PIL import Image
 import numpy as np
 
+import surfaces.sphere
 from camera import *
+from color_functions import *
 from intersection_functions import *
 from light import Light
 from material import Material
@@ -20,7 +22,7 @@ class Ray:
             np.subtract(pixel_center, camera_pos))  # Vector from camera to the pixel's center
 
     def get_point_from_t(self, t):
-        return self.camera_pos + t * np.array(self.ray_direction)
+        return self.camera_pos + t * np.array(self.ray_direction.direction)
 
 
 def send_ray_through_pixel(camera, screen, image_i, image_j):
@@ -29,22 +31,6 @@ def send_ray_through_pixel(camera, screen, image_i, image_j):
     # Ray from camera to the pixel corresponding to pixel (i,j) in image:
     ray = Ray(camera.position, pix_center)
     return ray
-
-
-def get_pixel_color(camera, ray, scene_settings, objects, current_recursion_depth):
-    max_recursion = scene_settings.max_recursions
-    if current_recursion_depth >= max_recursion:
-        # return bg color
-        return np.array(scene_settings.background_color)
-    collide_objects = find_intersections(ray, objects)  # TODO: change later
-    if len(collide_objects) == 0:
-        # return bg color
-        return np.array(scene_settings.background_color)
-
-
-def get_surface_color(surface, objects, camera, ray, scene_settings, current_recursion_depth):
-    #  TODO:need to complete later
-    return
 
 
 def get_cube_normal(cube, intersection_point):
@@ -74,18 +60,19 @@ def get_cube_normal(cube, intersection_point):
 
 
 def get_surface_normal(surface, intersection_point):
-    if isinstance(surface, Sphere.Sphere):
+    if isinstance(surface, surfaces.sphere.Sphere):
         return Unit_Vector(intersection_point - surface.position)
 
     elif isinstance(surface, infinite_plane.InfinitePlane):
-        return surface.normal
+        return Unit_Vector(surface.normal)
 
     else:
-        return get_cube_normal(surface, intersection_point)
+        return Unit_Vector(get_cube_normal(surface, intersection_point))
 
 
 def parse_scene_file(file_path):
     objects = []
+    lights = []
     camera = None
     scene_settings = None
     with open(file_path, 'r') as f:
@@ -114,10 +101,10 @@ def parse_scene_file(file_path):
                 objects.append(cube)
             elif obj_type == "lgt":
                 light = Light(params[:3], params[3:6], params[6], params[7], params[8])
-                objects.append(light)
+                lights.append(light)
             else:
                 raise ValueError("Unknown object type: {}".format(obj_type))
-    return camera, scene_settings, objects
+    return camera, scene_settings, objects, lights
 
 
 def save_image(image_array):
@@ -138,7 +125,7 @@ def main():
     # Parse the scene file
     image_height = args.height
     image_width = args.width
-    camera, scene_settings, objects = parse_scene_file(args.scene_file)
+    camera, scene_settings, objects, lights = parse_scene_file(args.scene_file)
     screen = build_screen(camera, image_width, image_height)  # TODO:args names might be incorrect
     # Initialize an empty image
     image_array = np.zeros((image_height, image_width, 3))
@@ -146,10 +133,11 @@ def main():
         for j in range(image_width):
             ray = send_ray_through_pixel(camera, screen, j, i)  # sending ray through each image's pixel
             # calculate color for pixel
-            color = get_pixel_color(camera, ray, scene_settings, objects, 0)
+            color = get_pixel_color(camera.position, ray, scene_settings, objects, lights, 0)
             # set color for pixel
             image_array[i][j] = color
-
+    print("------------ image array")
+    print(image_array)
     # Save the output image
     save_image(image_array)
 

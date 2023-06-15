@@ -5,21 +5,23 @@ from surfaces import cube
 from surfaces import infinite_plane
 from surfaces import sphere as Sphere
 
+EPSILON = 10**-8  # TODO:what the right value?
+
 
 def plane_intersection(ray, inf_plane):
-    if np.dot(ray.ray_direction, inf_plane.normal) == 0:
+    if np.dot(ray.ray_direction.direction, np.array(inf_plane.normal)) == 0:
         # the ray does not intersect the plane (ray is parallel to the plane)
         return -1
     # else
     # t is the amount of ray.dir needed to get from p0(camera) to the intersection point on the plane
-    t = -1 * (np.dot(ray.camera_pos, inf_plane.normal) - inf_plane.offset) / np.dot(ray.ray_direction, inf_plane.normal)
+    t = -1 * (np.dot(ray.camera_pos, inf_plane.normal) - inf_plane.offset) / np.dot(ray.ray_direction.direction, inf_plane.normal)
     return t
 
 
 def sphere_intersection(ray, sphere):
     # according to the geometric method in the presentation
-    L = sphere.position - ray.camera_pos
-    t_ca = np.dot(L, ray.ray_direction)
+    L = np.subtract(sphere.position, ray.camera_pos)
+    t_ca = np.dot(L, ray.ray_direction.direction)
     if t_ca < 0:
         return -1
     d_2 = np.dot(L, L) - pow(t_ca, 2)
@@ -97,7 +99,6 @@ def cube_intersection(ray, cube):
 def find_intersections(ray, objects):
     # min_t = -1
     surfaces_list = []
-    EPSILON = 10**-8  # TODO:what the right value?
     for surface in objects:
         t = 0  # init
         if isinstance(surface, cube.Cube):
@@ -112,4 +113,5 @@ def find_intersections(ray, objects):
             # if t < min_t or min_t == -1:
             #     min_t = t
 
-    return surfaces_list.sort(key=lambda tup: tup[1])  # sort by t
+    surfaces_list.sort(key=lambda tup: tup[1])  # sort by t
+    return surfaces_list
