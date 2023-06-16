@@ -63,18 +63,15 @@ def calc_light_intensity(scene_settings, light_source, intersection_point, surfa
             #           the result: a floating point number between 0 to 1, that will replace the binary value of
             #           intersecting or not intersecting
             light_result = 1  # the "amount" of light that reached the intersection point from the cell
-            if np.linalg.norm(np.subtract(
-                    ray.camera_pos + ray.ray_direction.direction * intersected_surfaces[0][1], intersection_point)) < EPSILON:
-                hit_points_counter += 1
-            # for item in intersected_surfaces:
-            #     material = objects[item[0].material_index]
-            #     light_result *= material.transparency
-            #     t = item[1]
-            #     item_intersection = ray.camera_pos + ray.ray_direction.direction * t  # camera_pos = random_cell_point
-            #     if np.linalg.norm(np.subtract(item_intersection, intersection_point)) < EPSILON:
-            #         # The ray intersected the desired surface, need to stop
-            #         hit_points_counter += light_result
-            #         break
+            for item in intersected_surfaces:
+                material = objects[item[0].material_index]
+                t = item[1]
+                item_intersection = ray.camera_pos + ray.ray_direction.direction * t  # camera_pos = random_cell_point
+                if np.linalg.norm(np.subtract(item_intersection, intersection_point)) < EPSILON:
+                    # The ray intersected the desired surface, need to stop
+                    hit_points_counter += light_result
+                    break
+                light_result *= material.transparency
 
     hit_precentage = hit_points_counter / (scene_settings.root_number_shadow_rays ** 2)
     return (1 - light_source.shadow_intensity) + (light_source.shadow_intensity * hit_precentage)
