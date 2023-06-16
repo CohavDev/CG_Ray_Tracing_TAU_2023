@@ -5,7 +5,7 @@ from surfaces import cube
 from surfaces import infinite_plane
 from surfaces import sphere as Sphere
 
-EPSILON = 10**-8  # TODO:what the right value?
+EPSILON = 10**-9  # TODO:what the right value?
 
 
 def plane_intersection(ray, inf_plane):
@@ -107,11 +107,9 @@ def find_intersections(ray, objects):
             t = sphere_intersection(ray, surface)
         elif isinstance(surface, infinite_plane.InfinitePlane):
             t = plane_intersection(ray, surface)
-
         if t > EPSILON:
             surfaces_list.append((surface, t))
             # if t < min_t or min_t == -1:
             #     min_t = t
-
     surfaces_list.sort(key=lambda tup: tup[1])  # sort by t
     return surfaces_list

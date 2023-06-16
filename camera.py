@@ -36,7 +36,7 @@ class Camera:
         self.towards = Unit_Vector(np.subtract(look_at, position))
 
     def fix_up_vector(self):
-        horizontal = Unit_Vector(np.cross(self.up_vector.direction, self.towards.direction))
+        horizontal = Unit_Vector(np.cross(self.towards.direction,self.up_vector.direction))
         vertical = Unit_Vector(np.cross(self.towards.direction, horizontal.direction))  # getting real up direction vector
 
         # Fix up vector:

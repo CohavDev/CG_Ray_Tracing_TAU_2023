@@ -2,6 +2,7 @@ import argparse
 from PIL import Image
 import numpy as np
 
+import color_functions
 import surfaces.sphere
 from camera import *
 from color_functions import *
@@ -12,7 +13,6 @@ from scene_settings import SceneSettings
 from surfaces.cube import Cube
 from surfaces.infinite_plane import InfinitePlane
 from surfaces.sphere import Sphere
-
 
 class Ray:
     def __init__(self, camera_pos, pixel_center):
@@ -109,7 +109,6 @@ def parse_scene_file(file_path):
 
 def save_image(image_array):
     image = Image.fromarray(np.uint8(image_array))
-
     # Save the image to a file
     image.save("scenes/Spheres.png")
 
@@ -129,15 +128,20 @@ def main():
     screen = build_screen(camera, image_width, image_height)  # TODO:args names might be incorrect
     # Initialize an empty image
     image_array = np.zeros((image_height, image_width, 3))
+    counter = 0
     for i in range(image_height):
         for j in range(image_width):
             ray = send_ray_through_pixel(camera, screen, j, i)  # sending ray through each image's pixel
             # calculate color for pixel
             color = get_pixel_color(camera.position, ray, scene_settings, objects, lights, 0)
             # set color for pixel
+            if color[0] == 1:
+                counter += 1
             image_array[i][j] = color
+
     print("------------ image array")
-    print(image_array)
+    image_array = np.clip(image_array, 0., 1.)
+    image_array *= 255
     # Save the output image
     save_image(image_array)
 

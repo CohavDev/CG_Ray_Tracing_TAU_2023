@@ -4,8 +4,10 @@ import numpy as np
 from camera import Unit_Vector
 from ray_tracer import Ray, get_surface_normal
 import intersection_functions
+from surfaces import infinite_plane
 
-EPSILON = 10 ** -8
+EPSILON = 10 ** -9
+c = 0
 
 
 def calc_diffuse_reflection(light, light_intensity, surface_diffuse_color, intersection_point, surface_normal):
@@ -61,21 +63,25 @@ def calc_light_intensity(scene_settings, light_source, intersection_point, surfa
             #           the result: a floating point number between 0 to 1, that will replace the binary value of
             #           intersecting or not intersecting
             light_result = 1  # the "amount" of light that reached the intersection point from the cell
-            for item in intersected_surfaces:
-                material = objects[item[0].material_index]
-                light_result *= material.transparency
-                t = item[1]
-                item_intersection = ray.camera_pos + ray.ray_direction.direction * t  # camera_pos = random_cell_point
-                if np.linalg.norm(np.subtract(item_intersection, intersection_point)) < EPSILON:
-                    # The ray intersected the desired surface, need to stop
-                    hit_points_counter += light_result
-                    break
+            if np.linalg.norm(np.subtract(
+                    ray.camera_pos + ray.ray_direction.direction * intersected_surfaces[0][1], intersection_point)) < EPSILON:
+                hit_points_counter += 1
+            # for item in intersected_surfaces:
+            #     material = objects[item[0].material_index]
+            #     light_result *= material.transparency
+            #     t = item[1]
+            #     item_intersection = ray.camera_pos + ray.ray_direction.direction * t  # camera_pos = random_cell_point
+            #     if np.linalg.norm(np.subtract(item_intersection, intersection_point)) < EPSILON:
+            #         # The ray intersected the desired surface, need to stop
+            #         hit_points_counter += light_result
+            #         break
 
     hit_precentage = hit_points_counter / (scene_settings.root_number_shadow_rays ** 2)
     return (1 - light_source.shadow_intensity) + (light_source.shadow_intensity * hit_precentage)
 
 
-def get_surface_color(intersected_surfaces, current_surface_index, objects, lights, origin_position, ray, scene_settings,
+def get_surface_color(intersected_surfaces, current_surface_index, objects, lights, origin_position, ray,
+                      scene_settings,
                       current_recursion_depth):
     surface = intersected_surfaces[current_surface_index][0]
     t = intersected_surfaces[current_surface_index][1]
@@ -97,7 +103,8 @@ def get_surface_color(intersected_surfaces, current_surface_index, objects, ligh
                                                  intersection_point, surface_normal)
         specular_color += calc_specular_reflection(light, light_intensity, origin_position, intersection_point,
                                                    material.shininess, surface_normal)
-
+    # if isinstance(surface, infinite_plane.InfinitePlane):
+    #     print("diffuse color of plane: ", diffuse_color)
     diffuse_color = material.diffuse_color * diffuse_color
     specular_color = material.specular_color * specular_color
 
@@ -119,18 +126,20 @@ def get_surface_color(intersected_surfaces, current_surface_index, objects, ligh
                                                   0)  # TODO: 0?
     output_color = background_color * material.transparency + \
                    (diffuse_color + specular_color) * (1 - material.transparency) + reflection_color
-
     return output_color
 
 
 def get_pixel_color(origin_position, ray, scene_settings, objects, lights, current_recursion_depth):
+    global c
     max_recursion = scene_settings.max_recursions
     if current_recursion_depth >= max_recursion:
         # return bg color
         return np.array(scene_settings.background_color)
-    collide_objects = intersection_functions.find_intersections(ray, objects)  # TODO: change later
+    collide_objects = intersection_functions.find_intersections(ray, objects)
     if len(collide_objects) == 0:
         # return bg color, no surfaces intersected
         return np.array(scene_settings.background_color)
+    c += 1
     # Call get_surface_color that is defined above
-    return np.array(get_surface_color(collide_objects, 0, objects, lights, origin_position, ray, scene_settings, current_recursion_depth))
+    return np.array(get_surface_color(collide_objects, 0, objects, lights, origin_position, ray, scene_settings,
+                                      current_recursion_depth))
