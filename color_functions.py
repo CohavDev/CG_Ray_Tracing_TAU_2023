@@ -21,6 +21,7 @@ def calc_diffuse_reflection(light, light_intensity, surface_diffuse_color, inter
 
 def calc_specular_reflection(light, light_intensity, origin_position, intersection_point,
                              shininess, surface_normal):
+    global c
     L = Unit_Vector(light.position - intersection_point).direction  # the opposite light dir
     V = Unit_Vector(origin_position - intersection_point)
     R = L - (2 * np.dot(L, surface_normal.direction) * surface_normal.direction)
@@ -28,6 +29,7 @@ def calc_specular_reflection(light, light_intensity, origin_position, intersecti
     R_dot_V = np.dot(R.direction, V.direction)
     if R_dot_V < 0:
         return np.zeros(3, dtype=float)
+    c += 1
     return np.array(light.color) * light_intensity * (R_dot_V ** shininess) * light.specular_intensity
 
 
@@ -63,6 +65,8 @@ def calc_light_intensity(scene_settings, light_source, intersection_point, surfa
             #           the result: a floating point number between 0 to 1, that will replace the binary value of
             #           intersecting or not intersecting
             light_result = 1  # the "amount" of light that reached the intersection point from the cell
+            # if np.linalg.norm(np.subtract(ray.camera_pos + ray.ray_direction.direction * intersected_surfaces[0][1], intersection_point)) < EPSILON:
+            #     hit_points_counter += 1
             for item in intersected_surfaces:
                 material = objects[item[0].material_index]
                 t = item[1]
@@ -72,6 +76,8 @@ def calc_light_intensity(scene_settings, light_source, intersection_point, surfa
                     hit_points_counter += light_result
                     break
                 light_result *= material.transparency
+                if material.transparency == 0:
+                    break
 
     hit_precentage = hit_points_counter / (scene_settings.root_number_shadow_rays ** 2)
     return (1 - light_source.shadow_intensity) + (light_source.shadow_intensity * hit_precentage)
@@ -100,8 +106,7 @@ def get_surface_color(intersected_surfaces, current_surface_index, objects, ligh
                                                  intersection_point, surface_normal)
         specular_color += calc_specular_reflection(light, light_intensity, origin_position, intersection_point,
                                                    material.shininess, surface_normal)
-    # if isinstance(surface, infinite_plane.InfinitePlane):
-    #     print("diffuse color of plane: ", diffuse_color)
+
     diffuse_color = material.diffuse_color * diffuse_color
     specular_color = material.specular_color * specular_color
 
@@ -127,7 +132,6 @@ def get_surface_color(intersected_surfaces, current_surface_index, objects, ligh
 
 
 def get_pixel_color(origin_position, ray, scene_settings, objects, lights, current_recursion_depth):
-    global c
     max_recursion = scene_settings.max_recursions
     if current_recursion_depth >= max_recursion:
         # return bg color
@@ -136,7 +140,6 @@ def get_pixel_color(origin_position, ray, scene_settings, objects, lights, curre
     if len(collide_objects) == 0:
         # return bg color, no surfaces intersected
         return np.array(scene_settings.background_color)
-    c += 1
     # Call get_surface_color that is defined above
     return np.array(get_surface_color(collide_objects, 0, objects, lights, origin_position, ray, scene_settings,
                                       current_recursion_depth))

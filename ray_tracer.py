@@ -107,10 +107,10 @@ def parse_scene_file(file_path):
     return camera, scene_settings, objects, lights
 
 
-def save_image(image_array):
+def save_image(image_array, output_image):
     image = Image.fromarray(np.uint8(image_array))
     # Save the image to a file
-    image.save("scenes/Spheres.png")
+    image.save("scenes/"+output_image)
 
 
 def main():
@@ -139,11 +139,12 @@ def main():
                 counter += 1
             image_array[i][j] = color
 
+    print("Shininess 'if dot >= 0'  counter", color_functions.c)
     print("------------ image array")
     image_array = np.clip(image_array, 0., 1.)
     image_array *= 255
     # Save the output image
-    save_image(image_array)
+    save_image(image_array, args.output_image)
 
 
 if __name__ == '__main__':
