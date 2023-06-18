@@ -7,7 +7,6 @@ import intersection_functions
 from surfaces import infinite_plane
 
 EPSILON = 10 ** -9
-c = 0
 
 
 def calc_diffuse_reflection(light, light_intensity, surface_diffuse_color, intersection_point, surface_normal):
@@ -21,15 +20,13 @@ def calc_diffuse_reflection(light, light_intensity, surface_diffuse_color, inter
 
 def calc_specular_reflection(light, light_intensity, origin_position, intersection_point,
                              shininess, surface_normal):
-    global c
-    L = Unit_Vector(light.position - intersection_point).direction  # the opposite light dir
-    V = Unit_Vector(origin_position - intersection_point)
+    L = Unit_Vector(intersection_point - light.position).direction  # vector from light to intersection
+    V = Unit_Vector(origin_position - intersection_point)  # vector from intersection to viewer(origin)
     R = L - (2 * np.dot(L, surface_normal.direction) * surface_normal.direction)
     R = Unit_Vector(R)
     R_dot_V = np.dot(R.direction, V.direction)
     if R_dot_V < 0:
         return np.zeros(3, dtype=float)
-    c += 1
     return np.array(light.color) * light_intensity * (R_dot_V ** shininess) * light.specular_intensity
 
 
@@ -65,6 +62,8 @@ def calc_light_intensity(scene_settings, light_source, intersection_point, surfa
             #           the result: a floating point number between 0 to 1, that will replace the binary value of
             #           intersecting or not intersecting
             light_result = 1  # the "amount" of light that reached the intersection point from the cell
+            if len(intersected_surfaces) == 0:
+                continue
             # if np.linalg.norm(np.subtract(ray.camera_pos + ray.ray_direction.direction * intersected_surfaces[0][1], intersection_point)) < EPSILON:
             #     hit_points_counter += 1
             for item in intersected_surfaces:

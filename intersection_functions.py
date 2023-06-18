@@ -5,7 +5,7 @@ from surfaces import cube
 from surfaces import infinite_plane
 from surfaces import sphere as Sphere
 
-EPSILON = 10**-9  # TODO:what the right value?
+EPSILON = 10**-9
 
 
 def plane_intersection(ray, inf_plane):
@@ -47,8 +47,8 @@ def cube_intersection(ray, cube):
 
     # calculating tmin/tmax for each coordinate:
 
-    t_xmin = (slab_xmin - ray.camera_pos[0]) / ray.ray_direction[0]
-    t_xmax = (slab_xmax - ray.camera_pos[0]) / ray.ray_direction[0]
+    t_xmin = (slab_xmin - ray.camera_pos[0]) / ray.ray_direction.direction[0]
+    t_xmax = (slab_xmax - ray.camera_pos[0]) / ray.ray_direction.direction[0]
 
     if t_xmin > t_xmax:
         # Replace the two, in case the ray is from the 'positive' side of x-axis:
@@ -56,8 +56,8 @@ def cube_intersection(ray, cube):
         t_xmin = t_xmax
         t_xmax = temp
 
-    t_ymin = (slab_ymin - ray.camera_pos[1]) / ray.ray_direction[1]
-    t_ymax = (slab_ymax - ray.camera_pos[1]) / ray.ray_direction[1]
+    t_ymin = (slab_ymin - ray.camera_pos[1]) / ray.ray_direction.direction[1]
+    t_ymax = (slab_ymax - ray.camera_pos[1]) / ray.ray_direction.direction[1]
 
     if t_ymin > t_ymax:
         # Replace the two, in case the ray is from the 'positive' side of y-axis:
@@ -76,8 +76,8 @@ def cube_intersection(ray, cube):
     if t_ymax < t_xmax:
         t_xmax = t_ymax
 
-    t_zmin = (slab_zmin - ray.camera_pos[2]) / ray.ray_direction[2]
-    t_zmax = (slab_zmax - ray.camera_pos[2]) / ray.ray_direction[2]
+    t_zmin = (slab_zmin - ray.camera_pos[2]) / ray.ray_direction.direction[2]
+    t_zmax = (slab_zmax - ray.camera_pos[2]) / ray.ray_direction.direction[2]
 
     if t_zmin > t_zmax:
         # Replace the two, in case the ray is from the 'positive' side of z-axis:
