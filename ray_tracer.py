@@ -36,7 +36,7 @@ def get_cube_normal(cube, intersection_point):
     x = cube.position[0]
     y = cube.position[1]
     z = cube.position[2]
-    EPSILON = 10 ** -8
+    EPSILON = 10 ** -9
     # because cube is parallel to each axis, we can determine on which side of the cube the point is on
     # intersects positive x side of the cube
     if abs((intersection_point[0] - x) - cube.scale / 2) < EPSILON:
