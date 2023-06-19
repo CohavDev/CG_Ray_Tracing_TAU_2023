@@ -6,7 +6,7 @@ from ray_tracer import Ray, get_surface_normal
 import intersection_functions
 from surfaces import infinite_plane
 
-EPSILON = 10 ** -9
+EPSILON = 10 ** -10
 
 
 def calc_diffuse_reflection(light, light_intensity, surface_diffuse_color, intersection_point, surface_normal):
@@ -22,15 +22,16 @@ def calc_specular_reflection(light, light_intensity, origin_position, intersecti
                              shininess, surface_normal):
     L = Unit_Vector(intersection_point - light.position).direction  # vector from light to intersection
     V = Unit_Vector(origin_position - intersection_point)  # vector from intersection to viewer(origin)
-    R = L - (2 * np.dot(L, surface_normal.direction) * surface_normal.direction)
+    R = L - (2 * np.dot(L, surface_normal.direction) * surface_normal.direction)  # Reflection vector calculation
     R = Unit_Vector(R)
     R_dot_V = np.dot(R.direction, V.direction)
     if R_dot_V < 0:
         return np.zeros(3, dtype=float)
+    # Calculating the specular reflection color:
     return np.array(light.color) * light_intensity * (R_dot_V ** shininess) * light.specular_intensity
 
 
-def calc_light_intensity(scene_settings, light_source, intersection_point, surface, objects):
+def calc_light_intensity(scene_settings, light_source, intersection_point, objects):
     # Step 1 in pdf: 'Find a plane which is perpendicular to the ray'
     light_ray = Unit_Vector(intersection_point - light_source.position)
     horizontal_unit = Unit_Vector(light_ray.perpendicular_vector())
@@ -64,8 +65,6 @@ def calc_light_intensity(scene_settings, light_source, intersection_point, surfa
             light_result = 1  # the "amount" of light that reached the intersection point from the cell
             if len(intersected_surfaces) == 0:
                 continue
-            # if np.linalg.norm(np.subtract(ray.camera_pos + ray.ray_direction.direction * intersected_surfaces[0][1], intersection_point)) < EPSILON:
-            #     hit_points_counter += 1
             for item in intersected_surfaces:
                 material = objects[item[0].material_index]
                 t = item[1]
@@ -100,7 +99,7 @@ def get_surface_color(intersected_surfaces, current_surface_index, objects, ligh
     # Loop through all lights in the scene and calculate their affect on the intersection point
     for light in lights:
         # Calculating light intensity and adding the diffuse and specular color to the total, of each light
-        light_intensity = calc_light_intensity(scene_settings, light, intersection_point, surface, objects)
+        light_intensity = calc_light_intensity(scene_settings, light, intersection_point, objects)
         diffuse_color += calc_diffuse_reflection(light, light_intensity, material.diffuse_color,
                                                  intersection_point, surface_normal)
         specular_color += calc_specular_reflection(light, light_intensity, origin_position, intersection_point,
@@ -124,7 +123,7 @@ def get_surface_color(intersected_surfaces, current_surface_index, objects, ligh
             # Pass the ray through
             background_color *= get_surface_color(intersected_surfaces, current_surface_index + 1, objects, lights,
                                                   origin_position, ray, scene_settings,
-                                                  0)  # TODO: 0?
+                                                  0)
     output_color = background_color * material.transparency + \
                    (diffuse_color + specular_color) * (1 - material.transparency) + reflection_color
     return output_color

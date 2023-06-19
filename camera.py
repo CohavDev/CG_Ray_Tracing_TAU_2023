@@ -17,8 +17,6 @@ class Unit_Vector:
 
 
 class Screen:
-    # __slots__ = ('left_bottom_pixel_center', 'horizontal_scaled', 'vertical_scaled')
-
     #  describes the screen of the camera
     def __init__(self, left_bottom_pixel_center, horizontal_scaled, vertical_scaled):
         self.left_bottom_pixel_center = left_bottom_pixel_center
@@ -36,8 +34,9 @@ class Camera:
         self.towards = Unit_Vector(np.subtract(look_at, position))
 
     def fix_up_vector(self):
-        horizontal = Unit_Vector(np.cross(self.towards.direction,self.up_vector.direction))
-        vertical = Unit_Vector(np.cross(self.towards.direction, horizontal.direction))  # getting real up direction vector
+        horizontal = Unit_Vector(np.cross(self.towards.direction, self.up_vector.direction))
+        # getting real up direction vector:
+        vertical = Unit_Vector(np.cross(self.towards.direction, horizontal.direction))
 
         # Fix up vector:
         self.up_vector = vertical.direction
@@ -55,9 +54,9 @@ def build_screen(camera, image_pixel_width, image_pixel_height):
 
     # go to the left bottom corner using scaled horizontal & vertical vectors
     # (from the prespective of the camera position)
-    left_bottom_pixel = screen_center + (camera.screen_width / 2 * horizontal.direction)  # move to the left screen's edge
+    left_bottom_pixel = screen_center + (
+                camera.screen_width / 2 * horizontal.direction)  # move to the left screen's edge
     left_bottom_pixel -= (screen_height / 2 * vertical.direction)  # move to the bottom of the screen
-
 
     # How many coordinates to move in the screen to get to the next pixel
     pixel_width = camera.screen_width / image_pixel_width
@@ -67,7 +66,9 @@ def build_screen(camera, image_pixel_width, image_pixel_height):
     # Creating the screen's scaled vectors
     # (vectors are from camera perspective)
     screen_horizontal_pixel_step_vector = Unit_Vector(horizontal.direction)  # Unit vector in the right dir of screen
-    screen_horizontal_pixel_step_vector.direction = pixel_width * horizontal.direction  # Scaling the vector to the size of 1 screen's pixel
+
+    # Scaling the vector to the size of 1 screen's pixel:
+    screen_horizontal_pixel_step_vector.direction = pixel_width * horizontal.direction
     screen_vertical_pixel_step_vector = Unit_Vector(vertical.direction)
     screen_vertical_pixel_step_vector.direction = pixel_height * vertical.direction
 
@@ -75,5 +76,6 @@ def build_screen(camera, image_pixel_width, image_pixel_height):
     left_bottom_pixel += 0.5 * screen_horizontal_pixel_step_vector.direction + 0.5 * screen_vertical_pixel_step_vector.direction
 
     # Create screen object:
-    screen = Screen(left_bottom_pixel, screen_horizontal_pixel_step_vector.direction, screen_vertical_pixel_step_vector.direction)
+    screen = Screen(left_bottom_pixel, screen_horizontal_pixel_step_vector.direction,
+                    screen_vertical_pixel_step_vector.direction)
     return screen

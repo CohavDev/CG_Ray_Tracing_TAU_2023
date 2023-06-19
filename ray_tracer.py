@@ -36,7 +36,7 @@ def get_cube_normal(cube, intersection_point):
     x = cube.position[0]
     y = cube.position[1]
     z = cube.position[2]
-    EPSILON = 10 ** -9
+    EPSILON = 10 ** -10
     # because cube is parallel to each axis, we can determine on which side of the cube the point is on
     # intersects positive x side of the cube
     if abs((intersection_point[0] - x) - cube.scale / 2) < EPSILON:
@@ -59,6 +59,7 @@ def get_cube_normal(cube, intersection_point):
 
 
 def get_surface_normal(surface, intersection_point):
+    # Returns the normal according to the object & the intersection point
     if isinstance(surface, surfaces.sphere.Sphere):
         return Unit_Vector(intersection_point - surface.position)
 
@@ -71,7 +72,7 @@ def get_surface_normal(surface, intersection_point):
 
 def parse_scene_file(file_path):
     objects = []
-    lights = []
+    lights = []  # list of lights in the scene (originally it was inside objects)
     camera = None
     scene_settings = None
     with open(file_path, 'r') as f:
@@ -109,7 +110,7 @@ def parse_scene_file(file_path):
 def save_image(image_array, output_image):
     image = Image.fromarray(np.uint8(image_array))
     # Save the image to a file
-    image.save("scenes/" + output_image)
+    image.save("scenes/" + output_image)  # This line was changed. see readme for how to run
 
 
 def main():
@@ -124,22 +125,18 @@ def main():
     image_height = args.height
     image_width = args.width
     camera, scene_settings, objects, lights = parse_scene_file(args.scene_file)
-    screen = build_screen(camera, image_width, image_height)  # TODO:args names might be incorrect
+    screen = build_screen(camera, image_width, image_height)
     # Initialize an empty image
     image_array = np.zeros((image_height, image_width, 3))
-    counter = 0
     for i in range(image_height):
         for j in range(image_width):
             ray = send_ray_through_pixel(camera, screen, j, i)  # sending ray through each image's pixel
             # calculate color for pixel
             color = get_pixel_color(camera.position, ray, scene_settings, objects, lights, 0)
             # set color for pixel
-            if color[0] == 1:
-                counter += 1
             image_array[i][j] = color
 
-    print("------------ image array")
-    image_array = np.clip(image_array, 0., 1.)
+    image_array = np.clip(image_array, 0., 1.)  # Clipping values to be between 0 and 1, before multiplying by 255
     image_array *= 255
     # Save the output image
     save_image(image_array, args.output_image)
