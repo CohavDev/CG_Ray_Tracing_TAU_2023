@@ -110,7 +110,7 @@ def parse_scene_file(file_path):
 def save_image(image_array, output_image):
     image = Image.fromarray(np.uint8(image_array))
     # Save the image to a file
-    image.save("scenes/" + output_image)  # This line was changed. see readme for how to run
+    image.save(output_image)  # This line was changed. see readme for how to run
 
 
 def main():
