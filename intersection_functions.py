@@ -46,9 +46,11 @@ def cube_intersection(ray, cube):
     slab_zmin = cube.position[2] - cube.scale / 2
 
     # calculating tmin/tmax for each coordinate:
-
-    t_xmin = (slab_xmin - ray.camera_pos[0]) / ray.ray_direction.direction[0]
-    t_xmax = (slab_xmax - ray.camera_pos[0]) / ray.ray_direction.direction[0]
+    ray_direction_temp = ray.ray_direction.direction[0]
+    if ray.ray_direction[0] == 0:
+        ray_direction_temp = EPSILON
+    t_xmin = (slab_xmin - ray.camera_pos[0]) / ray_direction_temp
+    t_xmax = (slab_xmax - ray.camera_pos[0]) / ray_direction_temp
 
     if t_xmin > t_xmax:
         # Replace the two, in case the ray is from the 'positive' side of x-axis:
@@ -56,8 +58,11 @@ def cube_intersection(ray, cube):
         t_xmin = t_xmax
         t_xmax = temp
 
-    t_ymin = (slab_ymin - ray.camera_pos[1]) / ray.ray_direction.direction[1]
-    t_ymax = (slab_ymax - ray.camera_pos[1]) / ray.ray_direction.direction[1]
+    ray_direction_temp = ray.ray_direction.direction[1]
+    if ray.ray_direction[1] == 0:
+        ray_direction_temp = EPSILON
+    t_ymin = (slab_ymin - ray.camera_pos[1]) / ray_direction_temp
+    t_ymax = (slab_ymax - ray.camera_pos[1]) / ray_direction_temp
 
     if t_ymin > t_ymax:
         # Replace the two, in case the ray is from the 'positive' side of y-axis:
@@ -76,8 +81,11 @@ def cube_intersection(ray, cube):
     if t_ymax < t_xmax:
         t_xmax = t_ymax
 
-    t_zmin = (slab_zmin - ray.camera_pos[2]) / ray.ray_direction.direction[2]
-    t_zmax = (slab_zmax - ray.camera_pos[2]) / ray.ray_direction.direction[2]
+    ray_direction_temp = ray.ray_direction.direction[2]
+    if ray.ray_direction[2] == 0:
+        ray_direction_temp = EPSILON
+    t_zmin = (slab_zmin - ray.camera_pos[2]) / ray_direction_temp
+    t_zmax = (slab_zmax - ray.camera_pos[2]) / ray_direction_temp
 
     if t_zmin > t_zmax:
         # Replace the two, in case the ray is from the 'positive' side of z-axis:
